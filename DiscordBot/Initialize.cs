@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using Teams;
 
 namespace DiscordBot;
 
@@ -13,10 +14,8 @@ public class Initialize {
     private readonly InteractionService  _interactions;
 
     public Initialize(DiscordSocketClient? discord = null, InteractionService? interactions = null) {
-        _discord = discord ?? new DiscordSocketClient();
-        _interactions = interactions ?? new InteractionService(_discord, new InteractionServiceConfig {
-            UseCompiledLambda = true
-        });
+        _discord      = discord ?? new DiscordSocketClient();
+        _interactions = interactions ?? new InteractionService(_discord, new InteractionServiceConfig());
 
         _discord.Log += logAsync;
     }
@@ -27,7 +26,7 @@ public class Initialize {
                                     .MinimumLevel.Debug()
                                     .CreateLogger();
 
-    private async Task logAsync(LogMessage message) {
+    private static async Task logAsync(LogMessage message) {
         var severity = message.Severity switch {
             LogSeverity.Critical => LogEventLevel.Fatal,
             LogSeverity.Error    => LogEventLevel.Error,
@@ -45,7 +44,12 @@ public class Initialize {
         new ServiceCollection()
             .AddSingleton<IDiscordClient>(_discord)
             .AddSingleton(_interactions)
-            .AddSingleton(svc => new CommandService(svc, _discord, _interactions))
+            .AddSingleton<ITeamRepository>(new MemoryTeamRepository())
             .AddLogging(builder => builder.AddSerilog(Logger))
+            .AddSingleton(svc => new CommandService(svc, _discord, _interactions, Logger))
             .BuildServiceProvider();
+
+    public static void loadCommandService(IServiceProvider svc) {
+        svc.GetRequiredService<CommandService>();
+    }
 }
