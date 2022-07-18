@@ -20,9 +20,10 @@ public class CommandService {
         _interactions = interactions;
         _logger       = logger;
 
-        _client.Ready                      += initializeAsync;
-        _interactions.SlashCommandExecuted += handleSlashCommandExecuted;
-        _client.InteractionCreated         += handleInteractionCreated;
+        _client.Ready                        += initializeAsync;
+        _interactions.SlashCommandExecuted   += handleSlashCommandExecuted;
+        _interactions.ContextCommandExecuted += handleSlashCommandExecuted;
+        _client.InteractionCreated           += handleInteractionCreated;
     }
 
     private async Task initializeAsync() {
@@ -42,7 +43,7 @@ public class CommandService {
         await _interactions.ExecuteCommandAsync(context, _services);
     }
 
-    private async Task handleSlashCommandExecuted(SlashCommandInfo info, IInteractionContext ctx, IResult result) {
+    private async Task handleSlashCommandExecuted(ICommandInfo info, IInteractionContext ctx, IResult result) {
         var name = $"{info.Module.Name}#{info.Name}";
         (string logMessage, var severity, EmbedBuilder userMessage) = result switch {
             { IsSuccess: true } => (
