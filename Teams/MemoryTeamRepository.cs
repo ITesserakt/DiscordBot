@@ -14,10 +14,11 @@ public class MemoryTeamRepository : ITeamRepository {
 
     public EitherAsync<DomainError, Unit> addTeam(Team team) {
         if (_teamsByCaptain.Find(team.Captain).IsSome)
-            return new AlreadyExist<Team>(team, "teams of this captain");
-        if (_teamsByName.Find(team.Name).IsSome && !_teams.Add(team))
+            return new DomainError($"{team.Captain} already has a team");
+        if (_teamsByName.Find(team.Name).IsSome)
             return new AlreadyExist<Team>(team, "teams");
 
+        _teams.Add(team);
         _teamsByName    = associateByName();
         _teamsByCaptain = associateByCaptain();
         return Unit.Default;

@@ -57,6 +57,7 @@ public class CommandService {
                 $"Command `{name}` fails with exception for {ctx.User}: {r.Exception}",
                 LogEventLevel.Error,
                 new EmbedBuilder()
+                    .WithTitle("❌ Unhandled exception happened")
                     .WithDescription($"Failed with exception: {r.Exception.Message}. Contact with developers")
                     .WithColor(Color.Red)),
 
@@ -64,7 +65,7 @@ public class CommandService {
                 $"Execution of `{name}` ended with error for {ctx.User}: {result.ErrorReason}",
                 LogEventLevel.Warning,
                 new EmbedBuilder()
-                    .WithDescription("❌")
+                    .WithDescription($"❌ {result.ErrorReason}")
                     .WithColor(Color.Orange))
         };
 

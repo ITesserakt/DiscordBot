@@ -30,4 +30,6 @@ public record Team {
             _captain = value;
         }
     }
+
+    public override string ToString() => $"Team: {Name}";
 }
